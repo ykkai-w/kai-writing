@@ -2,7 +2,7 @@
 
 面向量化金融、统计与机器学习等领域的中英文学术写作。
 
-kai-writing 是供 Codex、Claude Code 等 AI 大模型使用的中英文学术写作 skill。它把从顶刊论文中学到的写作方法整理成可直接加载的规则与对照例，用于组织研究材料、撰写论文段落和润色初稿。重点处理论证顺序、措辞和段落组织，事实、数值和引用以作者提供的研究材料为准。中英文共用一个文件，可以直接查看[使用方法](#使用方法)、[中英文改稿对照](#中英文改稿对照)和[参考文献](#参考文献)。
+kai-writing 是供 Codex、Claude Code 等 AI 大模型使用的中英文学术写作 skill。它把从顶刊论文中学到的写作方法整理成可直接加载的规则与对照例，用于组织研究材料、撰写论文段落和润色初稿。重点处理论证顺序、措辞和段落组织，事实、数值和引用以作者提供的研究材料为准。中英文共用一个文件，可以直接查看[使用方法](#使用方法)、[中英文改稿对照示例](#中英文改稿对照)和[参考文献](#参考文献)。
 
 ## 本skill的制作机制
 
@@ -56,7 +56,7 @@ kai-writing 是供 Codex、Claude Code 等 AI 大模型使用的中英文学术�
 
 ### 中文案例
 
-来源论文《基于机器学习的双重动量指数轮动策略——以沪深300与中证1000为例》，第 4.3 节“与基准及基础DMR版本的对比”，表 7 后三段。 [改稿与说明的可复制文字](docs/EXAMPLES.md#演示改稿)。
+来源论文《基于机器学习的双重动量指数轮动策略——以沪深300与中证1000为例》，第 4.3 节“与基准及基础DMR版本的对比”，表 7 后三段。 [详见](docs/EXAMPLES.md#演示改稿)。
 
 #### 原文
 
@@ -76,11 +76,11 @@ Source paper, Forecasting Clean Vehicle Adoption and Market Substitution Dynamic
 
 The variance decomposition further reveals that penetration shocks account for 25.2% of the forecast error variance of CFV sales at the 12-period horizon, confirming that penetration is a substantively important, though not the sole, driver of CFV sales dynamics. The VECM error correction coefficient remains significantly negative across lag orders 2 to 5, confirming the stability of the long-run equilibrium result. Taken together, the Granger test establishes unidirectional temporal precedence from penetration to CFV sales, the VECM confirms a stable long-run equilibrium with rapid error correction, and the variance decomposition quantifies the magnitude of this influence. These results provide convergent evidence that the NEV-to-CFV substitution dynamic is not merely a statistical correlation but a directional, self-correcting process.
 
-![English revision and main changes](assets/example-en.png)
+![English revision example](assets/example-en.png)
 
 ## 参考文献
 
-以下按论文参考文献格式列出200篇参考论文，中文、英文各100篇，按发表来源分组，序号连续。题名、作者、年份和出版信息随条目列出，已核实的DOI给出直接链接，其他条目保留官方来源。副本与发表版本的差异见[书目来源说明](docs/BIBLIOGRAPHY_NOTES.md)。
+供skill训练的参考论文共200篇，其中中文、英文各100篇，详见[书目来源说明](docs/BIBLIOGRAPHY_NOTES.md)。
 
 ### 刊物与载体分布
 
