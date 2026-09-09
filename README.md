@@ -538,7 +538,7 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ## 相关资料
 
-关于AI的防御性写作问题，还参考了 [anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing) 和 [anti-defensive-writing-Skill](https://github.com/Adkid-Zephyr/anti-defensive-writing-Skill) 的讨论。书目另提供 [CSV文件](data/papers.csv)，项目不附参考论文全文。
+关于AI的防御性写作问题，还参考了 [anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing) 和 [anti-defensive-writing-Skill](https://github.com/Adkid-Zephyr/anti-defensive-writing-Skill) 的讨论。书目另提供 [CSV文件](data/papers.csv)。
 
 ## 作者
 
