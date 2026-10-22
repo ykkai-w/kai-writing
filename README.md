@@ -2,71 +2,141 @@
 
 面向量化金融、统计与机器学习等领域的中英文学术写作。
 
+Academic writing in Chinese and English for quantitative finance, statistics, machine learning, and related fields.
+
 kai-writing 是供 Codex、Claude Code 等 AI 大模型使用的中英文学术写作 skill。它通过顶刊论文的正文复现与逐段对照开展训练，形成可直接加载的写作规则与对照示例，用于整理研究材料、撰写论文段落和润色初稿。重点处理论证顺序、措辞和段落组织，事实、数值和引用以实际提供的研究材料为准。中英文共用一个文件，可以直接查看[使用方法](#使用方法)、[中英文改稿对照示例](#中英文改稿对照)和[参考文献](#参考文献)。
+
+kai-writing is an academic writing skill for models used through Codex, Claude Code, and similar tools. It supports Chinese and English. Its training process reproduces prose from leading journal papers and compares it with the originals paragraph by paragraph, producing writing rules and paired examples that can be loaded directly. Use it to organize research materials, draft paper sections, and revise drafts. It focuses on the order of an argument, wording, and paragraph structure; facts, numbers, and citations must come from the research materials actually supplied. Both writing languages are covered in one file. See [How to use](#how-to-use), [Chinese and English revision examples](#chinese-and-english-revision-examples), and [References](#references).
+
+For the full instructions in English, read [SKILL.en.md](SKILL.en.md). It covers the same Chinese and English writing modes as [SKILL.md](SKILL.md).
 
 ## 本skill的训练机制
 
+## How this skill is trained
+
 项目从中英文各100篇研究论文中选择材料，提取信息骨架，让模型按当前规范复现正文，再与原文逐段比较。骨架保留研究对象、数据、方法、结果、引用及其推理关系，不保留原文的完整句式；复现时，写作者只看到骨架和现有规范。单纯把顶刊文章交给AI概括写作特征，难以判断这些特征能否落实到具体表达。项目把顶刊原文的表述作为对照学习的真值，让大模型在同一组研究信息下比较复现稿与原文，找出信息安排、证据衔接和措辞上的差距。反复出现的问题被整理成规则和对照例，用于下一轮复现与比较。
+
+The project selects material from 100 Chinese and 100 English research papers, extracts an information skeleton, asks a model to reproduce the prose under the current guidelines, and compares the result with the original paragraph by paragraph. The skeleton preserves the research subject, data, methods, findings, citations, and reasoning between them, but not the original sentence structures. During reproduction, the writer sees only the skeleton and the current guidelines. Simply asking an AI to summarize the writing features of leading journal papers makes it difficult to tell whether those features can be applied in practice. The project uses the original prose as the reference target for comparative learning. Given the same research information, the model compares its reproduced draft with the original to identify differences in information order, connections between evidence, and wording. Recurring problems become rules and paired examples for the next round.
 
 ![本skill的训练流程](assets/workflow.png)
 
+The skill training workflow.
+
 每轮先检查骨架是否完整，提取阶段漏掉的内容回到提取阶段处理，再判断复现稿的表达差异是否影响理解或改变了原有判断。根据重复出现的问题提出候选规则，随后用新的材料试写，检查上一轮的问题是否减少、修改是否带来新的问题。作者审阅实际稿件后继续修正规范，下一轮重新执行复现与比较。各阶段的工作范围见[开发记录](docs/DEVELOPMENT.md)。
+
+Each round begins by checking the skeleton for completeness. Omissions are addressed at the extraction stage before assessing whether differences in expression affect understanding or alter the original claims. Recurring problems suggest candidate rules, which are then tried on new material to see whether the previous problems decline and whether the changes introduce new ones. The author reviews the resulting drafts and refines the guidelines before repeating reproduction and comparison. See the [development record](docs/DEVELOPMENT.md) for the scope of each stage.
 
 这套反馈思路也受到了笔者读过的两项研究的启发。David Silver 与图灵奖得主 Richard S. Sutton 在 [Welcome to the Era of Experience](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf) 中提出，让智能体通过行动、观察和可检验的结果持续学习，并根据经验修正已有认识。FunSearch 则给出了一个具体实现。在发表于 Nature 的 [Mathematical discoveries from program search with large language models](https://doi.org/10.1038/s41586-023-06924-6) 中，语言模型生成候选程序，评估器实际运行并评分，得分较好的程序进入下一轮生成过程。用于装箱问题时，程序要接受实际装箱结果的检验。这两项工作的启发在于让生成结果得到反馈，再据此改进。本项目将这一思路用于写作，以论文原文作对照，由作者审阅事实、论证和表达，逐轮修改可加载的规则与示例。这套训练流程也可供其他方向的 skill 开发参考，读者可以结合各自领域的范例与任务加以调整。欢迎交流实际使用中的经验和问题，一起探索更有效的 skill 训练方法。
 
+This feedback approach was also inspired by two studies the author has read. In [Welcome to the Era of Experience](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf), David Silver and Turing Award recipient Richard S. Sutton propose that agents learn continuously through actions, observations, and testable outcomes, revising their understanding through experience. FunSearch provides a concrete implementation. In [Mathematical discoveries from program search with large language models](https://doi.org/10.1038/s41586-023-06924-6), published in Nature, a language model generates candidate programs, an evaluator runs and scores them, and better programs inform the next round of generation. For bin packing, programs are tested against actual packing outcomes. Both studies motivate feeding results back into subsequent improvement. This project applies that idea to writing: original papers provide comparisons, the author reviews facts, arguments, and expression, and the loadable rules and examples are revised round by round. Developers of skills in other fields may adapt this workflow to their own examples and tasks. Experiences and problems from practical use are welcome as part of exploring more effective skill training methods.
+
 ## 具体改了哪些问题
+
+## Problems the skill addresses
 
 **① AI的防御性写作问题。** 研究对象和条件已经交代清楚后，不再补一段材料中没有依据的免责说明。研究实际报告的限制随相关论述保留，给写作者的材料缺项也不改写成研究缺陷。
 
+**① Defensive AI writing.** Once the subject and conditions are clear, do not add a disclaimer unsupported by the source material. Preserve limitations actually reported by the study alongside the relevant discussion. Missing material in the writer's input must not become an alleged flaw in the study.
+
 **② 空泛评价与重复总结。** 删除没有证据支持的自夸，用具体结果和比较说明研究发现。段末若只是换词复述前文，就在已有结果处结束；原稿提供的进一步解释和推理继续展开。
+
+**② Empty praise and repeated summaries.** Remove unsupported self-praise and convey findings through concrete results and comparisons. If a closing sentence merely rephrases what came before, end at the existing result. Retain further explanation and reasoning supplied by the draft.
 
 **③ 短段与零碎标题。** 围绕同一项比较，把结果、证据和解释放在连贯的段落中。只承接少量文字的小节合并或去掉标题，论证较长时按内容推进分段，不把一条结果、一句解释和一句总结各拆一段。
 
+**③ Short paragraphs and fragmented headings.** Keep the findings, evidence, and explanation for a comparison in coherent paragraphs. Merge very short subsections or remove their headings. Break longer arguments where the content progresses, rather than separating a result, an explanation, and a summary into three paragraphs.
+
 **④ 润色时擅自缩写。** 调整段落和措辞时，保留原稿的篇幅量级、论证展开程度和解释深度。合段前核对各段信息，局部去重后仍保留完整比较，不把一篇充分展开的论文改成结果摘要。
+
+**④ Unrequested shortening during revision.** Preserve the draft's approximate length, development of its argument, and depth of explanation when changing paragraphs or wording. Check what each paragraph contains before merging it. Remove local repetition while retaining complete comparisons; do not turn a fully developed paper into a results summary.
 
 **⑤ 数值与比较对象。** 逐项核对数值、单位、分母、时间范围和基准组，保留不确定性与必要条件。不同来源的数字不拼成新的统计量，百分比与百分点也不混用；需要计算时先确认输入与口径齐全。
 
+**⑤ Numbers and comparison groups.** Check each value, unit, denominator, time range, and reference group, preserving uncertainty and necessary conditions. Do not combine numbers from different sources into a new statistic or confuse percentages with percentage points. Before calculating, confirm that all inputs and definitions are available.
+
 **⑥ 判断强度。** 改稿保留原有判断的确定程度。相关关系、预测结果和因果效应分别表述，统计显著与实际重要性分开说明。材料中的可能解释不改成已经证实的机制，非显著结果也不直接写成没有效应。
+
+**⑥ Strength of claims.** Preserve the original degree of certainty. Distinguish associations, predictions, and causal effects, and distinguish statistical significance from practical importance. A possible explanation must not become an established mechanism, and a nonsignificant result must not be described as no effect.
 
 **⑦ 引用与观点归属。** 区分本研究发现、既有文献结论和作者解释，引用紧随它所支持的命题。采用某种方法不等于提出该方法，改换句子主语时也不改变方法、模型与原作者之间的关系。
 
+**⑦ Citations and attribution.** Distinguish the current study's findings, conclusions from prior literature, and the authors' interpretations. Place each citation beside the claim it supports. Using a method does not mean inventing it; changing a sentence's subject must not change the relationship between a method, a model, and its original authors.
+
 **⑧ 术语与括注。** 中文稿不反复附注常见术语的英文全称，缩写首次定义后不再重复解释。同一对象、模型和指标保持名称一致；自定义术语、容易混淆的名称及理解比较所需的定义照常写清。
+
+**⑧ Terms and parenthetical notes.** In Chinese drafts, avoid repeatedly appending English equivalents to familiar terms. Define abbreviations once rather than explaining them again. Use consistent names for the same subject, model, and metric, while retaining definitions needed for custom terms, ambiguous names, or the comparison at hand.
 
 **⑨ 标点与人称。** 普通叙述默认不用冒号，中文正文不用“我们”及“我们的”，以本文、本研究或省略主语表达。公式、代码、直接引文和文献题名按各自用途处理，不为统一表面形式改坏原有含义。
 
+**⑨ Punctuation and author reference.** Avoid colons by default in ordinary prose. Chinese manuscript text must avoid “我们” and “我们的” (we and our), using “本文” (this paper), “本研究” (this study), or an omitted subject instead. This Chinese restriction does not prohibit English we or our. Treat formulas, code, direct quotations, and publication titles according to their purpose; do not damage their meaning merely to make their surface form uniform.
+
 **⑩ 章节组织。** 引言围绕研究问题、已有证据与本文工作展开，结果部分按主要发现和必要比较组织，讨论解释结果含义及素材支持的局限。各章节按内容选择写法，不强填相同的段落模板。
+
+**⑩ Section structure.** Organize the introduction around the research question, existing evidence, and the present study; organize results around main findings and necessary comparisons; use the discussion to explain implications and limitations supported by the material. Let the content determine each section's structure rather than filling a shared paragraph template.
 
 **⑪ 表格与页面排版。** 表格采用三线表，表头写清对象和单位，表内保留便于比较的数字与短语，较长解释移到表注或正文。精简列名、重复文字与换行，统一数字精度，并检查Word或PDF的实际页面。
 
+**⑪ Tables and page layout.** Use three-rule tables, with horizontal rules at the top, below the header, and at the bottom. Make subjects and units clear in headers, keep comparable numbers and short phrases in cells, and move longer explanations to notes or prose. Shorten column names, remove repeated text and unnecessary line breaks, use consistent numerical precision, and inspect the actual Word or PDF pages.
+
 **⑫ 修改核验。** 正式正文和修改说明分开交付，每项修改应能在实际稿件中找到。附带工具检查部分字面规则、段落编号和修改记录；事实、论证与可读性仍须结合原始材料逐段核对。
+
+**⑫ Verifying revisions.** Deliver manuscript text separately from revision notes, and make every reported change traceable to the actual draft. The included tools check some literal rules, paragraph numbering, and revision records. Facts, arguments, and readability still require paragraph-by-paragraph comparison with the source material.
 
 ## 使用方法
 
+## How to use
+
 **① 加载规范。** 下载项目，把所在目录交给 Codex 或 Claude Code，要求先完整读取 [SKILL.md](SKILL.md)。中英文已经放在同一个文件里，按当前语言和章节选择规则，无需另行拼接提示词。
+
+**① Load the guidelines.** Download the project, give its directory to Codex or Claude Code, and ask it to read [SKILL.md](SKILL.md) in full first. Both Chinese and English writing modes are included, so select the target language and section without assembling additional prompts. [SKILL.en.md](SKILL.en.md) provides the same instructions in English.
 
 **② 提供材料。** 附上初稿、研究笔记或结果表，说明目标语言、章节与篇幅要求。研究结果、供理解的背景和编辑要求分开写；需要保留的比较、引用、解释及特殊格式一并说明。
 
+**② Supply the material.** Attach a draft, research notes, or results tables, and specify the target language, section, and length. Separate research findings, background for understanding, and editing instructions. Identify comparisons, citations, explanations, and special formatting that must be retained.
+
 **③ 指定改稿要求。** 可随稿这样说明。“先完整读取 kai-writing/SKILL.md，按中文结果模式润色下面的正文。保留事实、数值、引用和原稿的论证展开程度，不缩写。把围绕同一问题的短段合并，删去不必要的小标题。正式正文与修改说明分开交付。”写英文时改为英文及对应章节。
+
+**③ Specify the revision task.** For example: “First read kai-writing/SKILL.md in full, then revise the following text in Chinese Results mode. Preserve the facts, numbers, citations, and development of the original argument without shortening it. Merge short paragraphs that address the same question, remove unnecessary subheadings, and deliver manuscript text separately from revision notes.” For an English paper, specify English and the relevant section instead.
 
 **④ 对照检查。** 先核对稿件中的数字、引用和判断，再检查段落、小标题与冗余表达，最后查看Word或PDF的实际页面。需要机械核验时按[工具说明](docs/TOOLS.md)使用附带脚本，保留实际输出供复核。
 
+**④ Check the result.** First verify numbers, citations, and claims, then review paragraphs, subheadings, and redundant wording, and finally inspect the actual Word or PDF pages. When mechanical checks are needed, follow the [tool documentation](docs/TOOLS.md) and retain the actual output for review.
+
 ## 中英文改稿对照
+
+## Chinese and English revision examples
 
 下面两例来自实际稿件。两例供直接比较修改效果。
 
+The following two examples come from actual manuscripts and allow direct comparison of the revisions.
+
 ### 中文案例
+
+### Chinese example
 
 来源论文《基于机器学习的双重动量指数轮动策略——以沪深300与中证1000为例》，第 4.3 节“与基准及基础DMR版本的对比”，表 7 后三段。 [详见](docs/EXAMPLES.md#演示改稿)。
 
+Source paper: “A Machine-Learning-Based Dual-Momentum Index Rotation Strategy: The CSI 300 and CSI 1000 as an Example,” Section 4.3, “Comparison with the Benchmark and the Basic DMR Version,” the three paragraphs after Table 7. [See the revision and notes](docs/EXAMPLES.md#演示改稿).
+
 #### 原文
+
+#### Original Chinese text, with English translation
 
 相较于沪深300基准，DMR-ML策略在收益端实现了119.66%的绝对超额，在风险端将最大回撤从45.60%压缩至12.71%，改善幅度达32.89个百分点。这一结果表明，双重动量机制结合ML风险门禁能够在A股市场获取显著的风险调整超额收益。
 
+Compared with the CSI 300 benchmark, the DMR-ML strategy achieved an absolute excess return of 119.66% and reduced maximum drawdown from 45.60% to 12.71%, an improvement of 32.89 percentage points. This result shows that combining dual momentum with an ML risk gate can generate significant risk-adjusted excess returns in the A-share market.
+
 相较于基础版DMR策略，DMR-ML在累计收益上提升了49.66个百分点，在最大回撤上改善了6.26个百分点，夏普比率从0.66提升至0.94。这一对比清晰地展示了ML风险门禁模块的增益贡献：通过在高风险时段主动规避市场敞口，策略不仅降低了回撤幅度，还因避开了部分下跌行情而间接提升了累计收益。
+
+Compared with the basic DMR strategy, DMR-ML increased cumulative return by 49.66 percentage points, improved maximum drawdown by 6.26 percentage points, and raised the Sharpe ratio from 0.66 to 0.94. This comparison clearly demonstrates the additional contribution of the ML risk gate: by actively avoiding market exposure during high-risk periods, the strategy reduced drawdowns and indirectly increased cumulative return by avoiding some market declines.
 
 ML模块的贡献并非仅仅体现在绝对收益的提升上，更重要的是风险调整效率的改善。夏普比率从0.66提升至0.94，意味着每承担一单位风险所获得的收益补偿提高了42%。对于风险厌恶型投资者而言，这一改善具有实质性的价值。
 
+The ML module's contribution is not limited to higher absolute returns; more importantly, it improves risk-adjusted efficiency. The rise in the Sharpe ratio from 0.66 to 0.94 means that return compensation per unit of risk increased by 42%. This improvement has substantive value for risk-averse investors.
+
 ![中文改稿与主要修改](assets/example-cn.png)
+
+Chinese revision and main changes.
 
 ### English example
 
@@ -80,17 +150,31 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ## 参考文献
 
+## References
+
 供skill训练的参考论文共200篇，其中中文、英文各100篇，详见[书目来源说明](docs/BIBLIOGRAPHY_NOTES.md)。
+
+The skill's reference corpus comprises 200 papers: 100 in Chinese and 100 in English. See the [bibliographic source notes](docs/BIBLIOGRAPHY_NOTES.md). Each bibliographic entry is retained once in its original language below.
 
 ### 刊物与载体分布
 
+### Distribution by publication venue and type
+
 ![200篇参考论文的刊物分布](assets/corpus-distribution.png)
+
+Publication venues of the 200 reference papers.
 
 期刊论文195篇、期刊在线提前发表版本1篇、会议论文2篇、预印本2篇。
 
+The corpus contains 195 journal articles, one advance-online journal article, two conference papers, and two preprints.
+
 #### 中文（100篇）
 
+#### Chinese (100 papers)
+
 ##### 统计研究（24篇）
+
+##### Statistical Research (24 papers)
 
 [1] 张雨露, 平卫英, 罗良清. 数据要素供给使用核算框架研究[J]. 统计研究, 2026, 43(1): 15-28. DOI: [10.19343/j.cnki.11-1302/c.2026.01.001](https://doi.org/10.19343/j.cnki.11-1302/c.2026.01.001). [原文](https://tjyj.cbpt.cnki.net/portal/journal/portal/client/paper/af00cc9ab31ad2abade2cec91462e0db).
 
@@ -141,6 +225,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 [24] 陈磊, 陈松蹊, 何婧. 我国人口发展趋势及政策启示[J]. 统计研究, 2026, 43(8): 31-45. DOI: [10.19343/j.cnki.11-1302/c.2026.08.003](https://doi.org/10.19343/j.cnki.11-1302/c.2026.08.003). [原文](https://tjyj.cbpt.cnki.net/portal/journal/portal/client/paper/623c87805a23170700d3dc60d172d5cb).
 
 ##### 系统工程理论与实践（26篇）
+
+##### Systems Engineering — Theory & Practice (26 papers)
 
 [25] 马键, 胡毅, 汪寿阳. 有效协变量平衡倾向得分的奇异性问题与改进方法[J]. 系统工程理论与实践, 2026, 46(3): 1304-1323. DOI: [10.12011/SETP2024-1608](https://doi.org/10.12011/SETP2024-1608). [原文](https://sysengi.cjoe.ac.cn/CN/10.12011/SETP2024-1608).
 
@@ -195,6 +281,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 [50] 傅小倞, 陈榆彬, 李桦佚, 钱夏睿, 秦睿, 董书宇, 李珊. 基于IMI-LP模型的森林火灾蔓延趋势预测研究[J]. 系统工程理论与实践, 2026, 46(6): 2672-2691. DOI: [10.12011/SETP2024-2050](https://doi.org/10.12011/SETP2024-2050). [原文](https://sysengi.cjoe.ac.cn/CN/10.12011/SETP2024-2050).
 
 ##### 中国管理科学（30篇）
+
+##### Chinese Journal of Management Science (30 papers)
 
 [51] 郑强, 梁德翠, 付园园, 徐泽水. 基于三支冲突感知分析的群决策共识模型[J]. 中国管理科学, 2026, 34(1): 85-93. DOI: [10.16381/j.cnki.issn1003-207x.2023.0901](https://doi.org/10.16381/j.cnki.issn1003-207x.2023.0901). [原文](https://www.zgglkx.com/CN/10.16381/j.cnki.issn1003-207x.2023.0901).
 
@@ -258,6 +346,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### 金融研究（10篇）
 
+##### Journal of Financial Research (10 papers)
+
 [81] 刘珺, 康立, 丁雨婷. 资产价格与通胀感知偏差——基于数字金融发展的再思考[J]. 金融研究, 2026, (6): 1-19. [原文](http://www.jryj.org.cn/CN/abstract/abstract1618.shtml).
 
 [82] 孟源祎, 聂卓, 马光荣, 赵耀红. 开“前门”是否有助堵“后门”？——地方政府专项债务发行对隐性债务举借的影响[J]. 金融研究, 2026, (6): 20-37. [原文](http://www.jryj.org.cn/CN/abstract/abstract1619.shtml).
@@ -280,6 +370,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### 软件学报（5篇）
 
+##### Journal of Software (5 papers)
+
 [91] 汪莹, 字千成, 彭鑫, 娄一翎. 基于大语言模型的故障复现测试用例生成方法[J]. 软件学报, 2026,37(4):1690-1714. DOI: [10.13328/j.cnki.jos.007474](https://doi.org/10.13328/j.cnki.jos.007474). [原文](https://www.jos.org.cn/jos/ch/reader/view_abstract.aspx?file_no=7474&flag=1).
 
 [92] 李昱洁, 吴晗, 孟丹, 李天瑞, 杨新. 面向开放世界持续学习的任务敏感提示驱动混合专家模型[J]. 软件学报, 2026,37(4):1531-1547. DOI: [10.13328/j.cnki.jos.007525](https://doi.org/10.13328/j.cnki.jos.007525). [原文](https://www.jos.org.cn/jos/ch/reader/view_abstract.aspx?file_no=7525&flag=1).
@@ -291,6 +383,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 [95] 曲慕子, 亢良伊, 刘杰, 王帅, 叶丹, 黄涛. CodeLLMTuner: 基于样本重用的代码大模型选择与解码参数调优框架[J]. 软件学报, 2026,37(5):2131-2150. DOI: [10.13328/j.cnki.jos.007508](https://doi.org/10.13328/j.cnki.jos.007508). [原文](https://www.jos.org.cn/jos/ch/reader/view_abstract.aspx?file_no=7508&flag=1).
 
 ##### 管理世界（5篇）
+
+##### Management World (5 papers)
 
 [96] 李晶晶, 陈帅, 秦萍, 耿可心, 王雅璨. 信用管理对消费者行为的双重影响——基于哈啰单车驾照分的实证分析[J]. 管理世界, 2025, 41(4): 136-154. DOI: [10.19744/j.cnki.11-1235/f.2025.0051](https://doi.org/10.19744/j.cnki.11-1235/f.2025.0051). [原文](https://doi.org/10.19744/j.cnki.11-1235/f.2025.0051).
 
@@ -304,7 +398,11 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 #### 英文（100篇）
 
+#### English (100 papers)
+
 ##### Journal of Machine Learning Research（34篇）
+
+##### Journal of Machine Learning Research (34 papers)
 
 [101] Ansgar Steland. Online Detection of Changes in Moment--Based Projections: When to Retrain Deep Learners or Update Portfolios?[J]. Journal of Machine Learning Research, 2026, 27(2):1-50. [原文](https://www.jmlr.org/papers/v27/23-0274.html).
 
@@ -376,6 +474,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### Journal of the American Statistical Association（16篇）
 
+##### Journal of the American Statistical Association (16 papers)
+
 [135] Xinwei Shen, Peter Bühlmann, Armeen Taeb. Causality-Oriented Robustness: Exploiting General Noise Interventions[J]. Journal of the American Statistical Association, 2026, 121(553):704-715. DOI: [10.1080/01621459.2025.2544365](https://doi.org/10.1080/01621459.2025.2544365). [原文](https://doi.org/10.1080/01621459.2025.2544365).
 
 [136] Peter Braunsteins, Sophie Hautphenne, Carmen Minuesa. Consistent Least Squares Estimation in Population-Size-Dependent Branching Processes[J]. Journal of the American Statistical Association, 2026, 121(554):1695-1707. DOI: [10.1080/01621459.2025.2571247](https://doi.org/10.1080/01621459.2025.2571247). [原文](https://doi.org/10.1080/01621459.2025.2571247).
@@ -409,6 +509,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 [150] David T. Frazier, David J. Nott. Posterior Risk of Modular and Semi-Modular Bayesian Inference[J]. Journal of the American Statistical Association, 2026, 121(554):1588-1600. DOI: [10.1080/01621459.2025.2580690](https://doi.org/10.1080/01621459.2025.2580690). [原文](https://doi.org/10.1080/01621459.2025.2580690).
 
 ##### Journal of Econometrics（22篇）
+
+##### Journal of Econometrics (22 papers)
 
 [151] David W. Hughes. A jackknife bias correction for nonlinear network data models with fixed effects[J]. Journal of Econometrics, 2026, 253:106130. DOI: [10.1016/j.jeconom.2025.106130](https://doi.org/10.1016/j.jeconom.2025.106130). [原文](https://doi.org/10.1016/j.jeconom.2025.106130).
 
@@ -456,6 +558,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### The Journal of Finance（5篇）
 
+##### The Journal of Finance (5 papers)
+
 [173] ROBERT F. DITTMAR, ALEX HSU, GUILLAUME ROUSSELLET, PETER SIMASEK. Default Risk and the Pricing of U.S. Sovereign Bonds[J]. The Journal of Finance, 2026, 81(2):829-869. DOI: [10.1111/jofi.70014](https://doi.org/10.1111/jofi.70014). [原文](https://doi.org/10.1111/jofi.70014).
 
 [174] ALAN KWAN, YUKUN LIU, BEN MATTHIES. Institutional Investor Attention[J]. The Journal of Finance, 2026, 81(2):791-827. DOI: [10.1111/jofi.70009](https://doi.org/10.1111/jofi.70009). [原文](https://doi.org/10.1111/jofi.70009).
@@ -468,6 +572,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### Journal of Financial Economics（4篇）
 
+##### Journal of Financial Economics (4 papers)
+
 [178] Christian Heyerdahl-Larsen, Philipp Illeditsch. Demand disagreement[J]. Journal of Financial Economics, 2026, 175:104191. DOI: [10.1016/j.jfineco.2025.104191](https://doi.org/10.1016/j.jfineco.2025.104191). [原文](https://doi.org/10.1016/j.jfineco.2025.104191).
 
 [179] Quentin Vandeweyer, Minghao Yang, Constantine Yannelis. Discount factors and monetary policy: Evidence from dual-listed stocks[J]. Journal of Financial Economics, 2026, 175:104190. DOI: [10.1016/j.jfineco.2025.104190](https://doi.org/10.1016/j.jfineco.2025.104190). [原文](https://doi.org/10.1016/j.jfineco.2025.104190).
@@ -478,6 +584,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### The Review of Financial Studies（3篇）
 
+##### The Review of Financial Studies (3 papers)
+
 [182] Juan Antolín-Díaz, Ivan Petrella, Juan Rubio-Ramírez. Dividend Momentum and Stock Return Predictability: A Bayesian Approach[J]. The Review of Financial Studies, 2026, 39(5):1506-1554. DOI: [10.1093/rfs/hhaf110](https://doi.org/10.1093/rfs/hhaf110). [原文](https://doi.org/10.1093/rfs/hhaf110).
 
 [183] Christian Kubitza. Investor-Driven Corporate Finance: Evidence from Insurance Markets[J]. The Review of Financial Studies, 2026, hhag003. DOI: [10.1093/rfs/hhag003](https://doi.org/10.1093/rfs/hhag003). [原文](https://doi.org/10.1093/rfs/hhag003).
@@ -485,6 +593,8 @@ The variance decomposition further reveals that penetration shocks account for 2
 [184] Agostino Capponi, Ruizhe Jia, Shihao Yu. Price Discovery on Decentralized Exchanges[J]. The Review of Financial Studies, 2026, hhag002. DOI: [10.1093/rfs/hhag002](https://doi.org/10.1093/rfs/hhag002). [原文](https://doi.org/10.1093/rfs/hhag002).
 
 ##### Quantitative Finance（4篇）
+
+##### Quantitative Finance (4 papers)
 
 [185] Adele Ravagnani, Fabrizio Lillo, Paola Deriu, Piero Mazzarisi, Francesca Medda, Antonio Russo. Dimensionality reduction techniques to support insider trading detection[J]. Quantitative Finance, 2026, 26(4):563-591. DOI: [10.1080/14697688.2026.2636556](https://doi.org/10.1080/14697688.2026.2636556). [原文](https://doi.org/10.1080/14697688.2026.2636556).
 
@@ -496,13 +606,19 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### Journal of the Royal Statistical Society Series B（1篇）
 
+##### Journal of the Royal Statistical Society Series B (1 paper)
+
 [189] Ya Zhou, Raymond K. W. Wong, Kejun He. Broadcasted nonparametric tensor regression[J]. Journal of the Royal Statistical Society Series B, 2024, 86(5):1197-1220. DOI: [10.1093/jrsssb/qkae027](https://doi.org/10.1093/jrsssb/qkae027). [原文](https://doi.org/10.1093/jrsssb/qkae027).
 
 ##### Nature（1篇）
 
+##### Nature (1 paper)
+
 [190] Timothy J. Poterucha, Linyuan Jing, Ramon Pimentel Ricart, Michael Adjei-Mosi, Joshua Finer, Dustin Hartzel, Christopher Kelsey, Aaron Long, Daniel Rocha, Jeffrey A. Ruhl, David vanMaanen, Marc A. Probst, Brock Daniels, Shalmali D. Joshi, Olivier Tastet, Denis Corbin, Robert Avram, Joshua P. Barrios, Geoffrey H. Tison, I-Min Chiu, David Ouyang, Alexander Volodarskiy, Michelle Castillo, Francisco A. Roedan Oliver, Paloma P. Malta, Siqin Ye, Gregg F. Rosner, Jose M. Dizon, Shah R. Ali, Qi Liu, Corey K. Bradley, Prashant Vaishnava, Carol A. Waksmonski, Ersilia M. DeFilippis, Vratika Agarwal, Mark Lebehn, Polydoros N. Kampaktsis, Sofia Shames, Ashley N. Beecy, Deepa Kumaraiah, Shunichi Homma, Allan Schwartz, Rebecca T. Hahn, Martin Leon, Andrew J. Einstein, Mathew S. Maurer, Heidi S. Hartman, John Weston Hughes, Christopher M. Haggerty, Pierre Elias. Detecting structural heart disease from electrocardiograms using AI[J]. Nature, 2025, 644(8075): 221-230. DOI: [10.1038/s41586-025-09227-0](https://doi.org/10.1038/s41586-025-09227-0). [原文](https://doi.org/10.1038/s41586-025-09227-0).
 
 ##### arXiv preprint（2篇）
+
+##### arXiv preprint (2 papers)
 
 [191] Zhengyang Geng, Mingyang Deng, Xingjian Bai, J. Zico Kolter, Kaiming He. Mean Flows for One-step Generative Modeling[EB/OL]. arXiv, 2025, arXiv:2505.13447v1. DOI: [10.48550/arXiv.2505.13447](https://doi.org/10.48550/arXiv.2505.13447). [版本原文](https://arxiv.org/abs/2505.13447v1).
 
@@ -510,17 +626,25 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### SIAM Journal on Optimization（1篇）
 
+##### SIAM Journal on Optimization (1 paper)
+
 [193] Xudong Li, Defeng Sun, Kim-Chuan Toh. A Highly Efficient Semismooth Newton Augmented Lagrangian Method for Solving Lasso Problems[J]. SIAM Journal on Optimization, 2018, 28(1):433-458. DOI: [10.1137/16M1097572](https://doi.org/10.1137/16M1097572). [原文](https://doi.org/10.1137/16M1097572).
 
 ##### International Conference on Machine Learning（1篇）
+
+##### International Conference on Machine Learning (1 paper)
 
 [194] Xinlai Kang, Dunyao Xue, Zhengbo Wang, Chengshuo Du, Xinghao Chen, Hang Zhou, Hanting Chen, Cheng Meng. Breaking the Echo Chamber: A Dynamic Ensemble Pruning Perspective on MoE[C]. International Conference on Machine Learning, 2026. [原文](https://openreview.net/pdf?id=7FsbfQgti4).
 
 ##### IEEE Symposium on Security and Privacy（1篇）
 
+##### IEEE Symposium on Security and Privacy (1 paper)
+
 [195] Nicholas Carlini, Steve Chien, Milad Nasr, Shuang Song, Andreas Terzis, Florian Tramèr. Membership Inference Attacks From First Principles[C]. IEEE Symposium on Security and Privacy, 2022: 1897-1914. DOI: [10.1109/SP46214.2022.9833649](https://doi.org/10.1109/SP46214.2022.9833649). [原文](https://ieeexplore.ieee.org/document/9833649/).
 
 ##### Biometrika（3篇）
+
+##### Biometrika (3 papers)
 
 [196] C. H. Miles, I. Shpitser, P. Kanki, S. Meloni, E. J. Tchetgen Tchetgen. On semiparametric estimation of a path-specific effect in the presence of mediator-outcome confounding[J]. Biometrika, 2020, 107(1):159-172. DOI: [10.1093/biomet/asz063](https://doi.org/10.1093/biomet/asz063). [原文](https://doi.org/10.1093/biomet/asz063).
 
@@ -530,16 +654,28 @@ The variance decomposition further reveals that penetration shocks account for 2
 
 ##### The Annals of Statistics（1篇）
 
+##### The Annals of Statistics (1 paper)
+
 [199] Johannes Schmidt-Hieber. Nonparametric regression using deep neural networks with ReLU activation function[J]. The Annals of Statistics, 2020, 48(4):1875-1897. DOI: [10.1214/19-AOS1875](https://doi.org/10.1214/19-AOS1875). [原文](https://doi.org/10.1214/19-AOS1875).
 
 ##### Management Science（1篇）
+
+##### Management Science (1 paper)
 
 [200] Xue Wang, Mike Mingcheng Wei, Tao Yao. Online Learning and Decision Making Under Generalized Linear Model with High-Dimensional Data[J]. Management Science, 2024, Articles in Advance:1-19. DOI: [10.1287/mnsc.2022.01557](https://doi.org/10.1287/mnsc.2022.01557). [原文](https://doi.org/10.1287/mnsc.2022.01557).
 
 ## 相关资料
 
+## Related resources
+
 关于AI的防御性写作问题，还参考了 [anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing) 和 [anti-defensive-writing-Skill](https://github.com/Adkid-Zephyr/anti-defensive-writing-Skill) 的讨论。书目另提供 [CSV文件](data/papers.csv)。
+
+The discussions in [anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing) and [anti-defensive-writing-Skill](https://github.com/Adkid-Zephyr/anti-defensive-writing-Skill) also informed the treatment of defensive AI writing. The bibliography is available as a [CSV file](data/papers.csv).
 
 ## 作者
 
+## Author
+
 [Kai](https://github.com/ykkai-w)，CAU，金融学与数据科学在读。联系邮箱 [ykai.w@outlook.com](mailto:ykai.w@outlook.com)，其他项目见 [GitHub](https://github.com/ykkai-w) 和 [DMR-ML](https://dmrml.cn)。
+
+[Kai](https://github.com/ykkai-w), studying Finance and Data Science at CAU. Contact: [ykai.w@outlook.com](mailto:ykai.w@outlook.com). Other projects: [GitHub](https://github.com/ykkai-w) and [DMR-ML](https://dmrml.cn).
